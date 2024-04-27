@@ -1,5 +1,3 @@
-"use client"
-
 import Loader from '@/components/custom ui/Loader'
 import ProductForm from '@/components/products/ProductForm'
 import React, { useEffect, useState } from 'react'
@@ -8,24 +6,31 @@ const ProductDetails = ({ params }: { params: { productId: string }}) => {
   const [loading, setLoading] = useState(true)
   const [productDetails, setProductDetails] = useState<ProductType | null>(null)
 
-  const getProductDetails = async () => {
-    try { 
-      const res = await fetch(`/api/products/${params.productId}`, {
-        method: "GET"
-      })
-      const data = await res.json()
-      setProductDetails(data)
-      setLoading(false)
-    } catch (err) {
-      console.log("[productId_GET]", err)
+  useEffect(() => {
+    const getProductDetails = async () => {
+      try { 
+        const res = await fetch(`/api/products/${params.productId}`, {
+          method: "GET"
+        })
+        const data = await res.json()
+        setProductDetails(data)
+        setLoading(false)
+      } catch (err) {
+        console.log("[productId_GET]", err)
+        setLoading(false) // Set loading to false even on error
+      }
     }
+
+    getProductDetails(); // Call getProductDetails here
+
+  }, [params.productId]) // Include params.productId in the dependency array
+
+  // Handle the case when productDetails are not available yet
+  if (loading) {
+    return <Loader />
   }
 
-  useEffect(() => {
-    getProductDetails()
-  }, [])
-
-  return loading ? <Loader /> : (
+  return (
     <ProductForm initialData={productDetails} />
   )
 }
